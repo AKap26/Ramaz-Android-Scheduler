@@ -1,0 +1,46 @@
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tableRow1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_weight="1" >
+    
+    <TextView
+        android:id="@+id/orderText"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:paddingRight="6dp"
+        android:paddingLeft="2dp" />
+
+    <TextView
+        android:id="@+id/timeText"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:textSize="15sp"
+        android:paddingRight="2dp"
+        android:singleLine="false"
+        android:gravity="center"
+        android:text="00:00\n00:00" />
+
+    <TextView
+        android:id="@+id/classText"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:textSize="15sp"
+        android:gravity="center_vertical"
+        android:layout_weight="1"
+		android:paddingLeft="5dp"
+        android:text="Class" />
+    
+    <TextView
+        android:id="@+id/roomText"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:text="000" />
+
+</TableRow>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, RamazAppActivity!</string>
+    <string name="app_name">Ramaz</string>
+    <string name="prompt">HI THERE!</string>
+    <string name="about">
+    Created by Michael Rosenberg, class of 2015\nMade predominantly while I should have been studying for a Rabbi Stochel exam\nRegretful? Most certainly.
+    </string>
+
+    <string-array name="day_types">
+        <item>Monday-Thursday</item>
+        <item>Rosh Chodesh</item>
+        <item>AM Assembly</item>
+        <item>PM Assembly</item>
+        <item>Advisory</item>
+        <item>Friday Rosh Chodesh</item>
+        <item>Winter Friday</item>
+        <item>Friday</item>
+    </string-array>
+    <string-array name="week_days">
+        <item>X</item>
+        <item>Y</item>
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+        <item>D</item>
+    </string-array>
+
+</resources>

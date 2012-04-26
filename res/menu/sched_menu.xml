@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_day_type"
+        android:title="Day Type" />
+    <item android:id="@+id/menu_week_days"
+        android:title="Day of Week" />
+    <item android:id="@+id/menu_refresh"
+        android:title="Refresh"
+        android:icon="@drawable/ic_menu_refresh" />
+    <item android:id="@+id/menu_prefs"
+        android:title="Preferences" />
+    
+    
+    <!-- item android:id="@+id/icontext"
+        android:title="Icon+Text"
+        android:icon="@drawable/ic_launcher" /-->
+</menu>
