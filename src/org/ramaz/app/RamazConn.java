@@ -62,11 +62,8 @@ public class RamazConn {
 		StringBuilder sb = new StringBuilder();
 		String line = null;
 		String html = null;
-		int x = 0;
 		while ((line = rd.readLine()) != null) {
-			System.out.println("On line: " + x);
 			sb.append(line);
-			x++;
 		}
 		html = sb.toString();
 		int startIndex = html.indexOf("id_student");

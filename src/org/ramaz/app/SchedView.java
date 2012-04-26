@@ -18,6 +18,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -40,6 +41,7 @@ public class SchedView extends Activity {
 	public ArrayList<ArrayList<ClassRoom>> schedule;
 	private RefreshTask refreshTask;
 	public int lastWeekDay = 0, lastDayType = 0;
+	private int screenHeight;
 	
 	public void setSchedule(ArrayList<ArrayList<ClassRoom>> x) {
 		this.schedule = x;
@@ -56,7 +58,7 @@ public class SchedView extends Activity {
 				try {
 					fos.write((j.subject + ";" + j.room + "\n").getBytes());
 				} catch (IOException e) {
-					return;
+					e.printStackTrace();
 				}
 			}
 		}
@@ -86,12 +88,6 @@ public class SchedView extends Activity {
 			System.out.println("There are " + b + " classes");
 		}*/
 	}
-
-	/*@Override
-	public void onBackPressed() {
-		Toast.makeText(this, "Back Button Pressed", Toast.LENGTH_SHORT).show();
-		finish();
-	}*/
 
 	private void loadSchedule() throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput("schedule.txt"))); // Should throw FileNotFoundException if it fails
@@ -127,12 +123,7 @@ public class SchedView extends Activity {
 		if (this.schedule.size() != 10) {
 			Toast.makeText(this, "Something went wrong, please refresh", Toast.LENGTH_SHORT).show();
 			return;
-		}/*
-		for (int i = 0; i < 10; i++) {
-			if(this.schedule.get(i).size() != 6)
-				Toast.makeText(this, "Something went wrong, please refresh", Toast.LENGTH_SHORT).show();
-			return;
-		}*/
+		}
 		this.lastWeekDay = dayChoice;
 		TextView titleTxt = (TextView)findViewById(R.id.chosenDayTxt);
 		String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
@@ -285,6 +276,7 @@ public class SchedView extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -294,11 +286,17 @@ public class SchedView extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
+		/*DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		System.out.println("Vertical dpi is: " + dm.ydpi);*/
+		
+		//LinearLayout calibrator = new LinearLayout(this);
+		
 		
 		int statusBarHeight = 0;
-		int height = getWindowManager().getDefaultDisplay().getHeight();
-		System.out.println("Height " + height);
-		switch (height) {
+		this.screenHeight = getWindowManager().getDefaultDisplay().getHeight();
+		System.out.println("Height " + this.screenHeight);
+		switch (this.screenHeight) {
 		case 320:
 		case 400:
 		case 432:
@@ -315,12 +313,12 @@ public class SchedView extends Activity {
 		}
 
 		int titleRowHeight = 0;
-		if (height == 1184)
+		if (this.screenHeight == 1184)
 			titleRowHeight = 40;
 		else
 			titleRowHeight = 30;
-		height -= statusBarHeight;
-		height -= titleRowHeight;
+		this.screenHeight -= statusBarHeight;
+		this.screenHeight -= titleRowHeight;
 		int amount = 10; // Number of classes in a day
 		LinearLayout root = new LinearLayout(this);
 		root.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
@@ -346,40 +344,31 @@ public class SchedView extends Activity {
 			orderTxt.setText(Integer.toString(i + 2) + ".");
 
 			TableRow.LayoutParams timeLayoutParams = new TableRow.LayoutParams(
-					LayoutParams.FILL_PARENT, height / amount);
+					LayoutParams.FILL_PARENT, this.screenHeight / amount);
 			timeLayoutParams.setMargins(0, 0, 1, 0);
 			timeTxt.setLayoutParams(timeLayoutParams);
 
 			//registerForContextMenu(row); Future feature
 			row.setId(i);
+			
 
 			if (i % 2 == 0) { // Alternate colors to boost contrast
 				orderTxt.setBackgroundColor(this.darkRowBg);
-				orderTxt.setTextColor(this.lightRowBg);
 				timeTxt.setBackgroundColor(this.darkRowBg);
-				timeTxt.setTextColor(this.lightRowBg);
 				classTxt.setBackgroundColor(this.darkRowBg);
-				classTxt.setTextColor(this.lightRowBg);
 				roomTxt.setBackgroundColor(this.darkRowBg);
-				roomTxt.setTextColor(this.lightRowBg);
 			} else {
 				orderTxt.setBackgroundColor(this.lightRowBg);
-				orderTxt.setTextColor(this.darkRowBg);
 				timeTxt.setBackgroundColor(this.lightRowBg);
-				timeTxt.setTextColor(this.darkRowBg);
 				classTxt.setBackgroundColor(this.lightRowBg);
-				classTxt.setTextColor(this.darkRowBg);
 				roomTxt.setBackgroundColor(this.lightRowBg);
-				roomTxt.setTextColor(this.darkRowBg);
 			}
-			
-			/***************************************/
+
 			// NEW CODE
 			orderTxt.setTextColor(this.textColor);
 			timeTxt.setTextColor(this.textColor);
 			classTxt.setTextColor(this.textColor);
 			roomTxt.setTextColor(this.textColor);
-			/***************************************/
 			
 			table.addView(row);
 		}
