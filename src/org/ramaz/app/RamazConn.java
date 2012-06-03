@@ -20,7 +20,8 @@ import org.jsoup.select.Elements;
 
 public class RamazConn {
 
-	private int student_id;
+	private String id, semester;
+	private Boolean isStudent;
 	private DefaultHttpClient httpclient;
 
 	RamazConn() {
@@ -54,45 +55,32 @@ public class RamazConn {
 			}
 		}
 
-		// Need course page for student id
-		HttpGet get = new HttpGet("http://www.ramaz.org/course");
+		HttpGet get = new HttpGet("http://www.ramaz.org/appHelper/classSched.cfm");
 		response = this.httpclient.execute(get);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
 				.getEntity().getContent()));
-		StringBuilder sb = new StringBuilder();
-		String line = null;
-		String html = null;
-		while ((line = rd.readLine()) != null) {
-			sb.append(line);
-		}
-		html = sb.toString();
-		int startIndex = html.indexOf("id_student");
-		if (startIndex == -1) {
-			startIndex = html.indexOf("id_faculty");
-			if (startIndex == -1) {
-				startIndex = html.indexOf("id_teacher");
-				if (startIndex == -1) {
-					throw (new Exception("Login Error"));
-				}
-			}
-		}
-		int endIndex;
-		startIndex += "id_student=".length();
-		for (endIndex = startIndex; endIndex < html.length(); endIndex++) {
-			if (!Character.isDigit(html.charAt(endIndex)))
-				break;
-		}
-		System.out.println(html); // HTML now contains the course page
-		System.out.println("startIndex=" + startIndex);
-		System.out.println("endIndex=" + endIndex);
-		this.student_id = Integer
-				.parseInt(html.substring(startIndex, endIndex));
-		System.out.println(this.student_id);
+		rd.readLine();
+		String info = rd.readLine();
+		if (info.startsWith("STUDENT"))
+			this.isStudent = true;
+		else if (info.startsWith("FACULTY"))
+			this.isStudent = false;
+		else
+			throw (new Exception("Login Error"));
+		
+		this.id = info.substring(8);
+		this.semester = rd.readLine();
 	}
 
 	public ArrayList<ArrayList<ClassRoom>> getSched() throws Exception {
-		HttpGet get = new HttpGet(
-				"http://www.ramaz.org/course/view_class_schedule.cfm?semester=2&id_student=" + this.student_id);
+		HttpGet get;
+		if (this.isStudent) {
+			get = new HttpGet(
+					"http://www.ramaz.org/course/view_class_schedule.cfm?semester=" + this.semester + "&id_student=" + this.id);
+		} else {
+			get = new HttpGet(
+					"http://www.ramaz.org/course/view_faculty_class_schedule.cfm?semester=" + this.semester + "&id_faculty=" + this.id);
+		}
 		HttpResponse response = this.httpclient.execute(get);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
 				.getEntity().getContent()));

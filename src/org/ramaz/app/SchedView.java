@@ -18,7 +18,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -38,7 +37,7 @@ public class SchedView extends Activity {
 	private int lightRowBg = 0xFFEBEBEB; //0xffaaaaaa;
 	private int darkRowBg = 0xFFB0B0B0; //Color.DKGRAY;
 	private int textColor = 0xFF000000;
-	public ArrayList<ArrayList<ClassRoom>> schedule;
+	public ArrayList<ArrayList<ClassRoom>> schedule = null;
 	private RefreshTask refreshTask;
 	public int lastWeekDay = 0, lastDayType = 0;
 	private int screenHeight;
@@ -120,18 +119,18 @@ public class SchedView extends Activity {
 
 	public void displayClasses(int dayChoice) {
 		System.out.println("In displayClasses");
-		if (this.schedule.size() != 10) {
-			Toast.makeText(this, "Something went wrong, please refresh", Toast.LENGTH_SHORT).show();
-			return;
-		}
-		this.lastWeekDay = dayChoice;
-		TextView titleTxt = (TextView)findViewById(R.id.chosenDayTxt);
-		String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
-		title += " - ";
-		title += getResources().getStringArray(R.array.day_types)[this.lastDayType];
-		titleTxt.setText(title);
-		//System.out.println("Status bar height == " + getStatusBarHeight());
 		if (this.schedule != null) {
+			if (this.schedule.size() != 10) {
+				Toast.makeText(this, "Something went wrong, please refresh", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			this.lastWeekDay = dayChoice;
+			TextView titleTxt = (TextView)findViewById(R.id.chosenDayTxt);
+			String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
+			title += " - ";
+			title += getResources().getStringArray(R.array.day_types)[this.lastDayType];
+			titleTxt.setText(title);
+			//System.out.println("Status bar height == " + getStatusBarHeight());
 			System.out.println("Schedule size: " + this.schedule.size());
 			for (int i = 0; i < this.schedule.size(); i++) {
 				TableRow row = (TableRow) findViewById(i);
