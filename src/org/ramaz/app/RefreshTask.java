@@ -33,7 +33,6 @@ public class RefreshTask extends AsyncTask<String, Void, String> {
 		this.dialog = ProgressDialog.show(this.context, "", "Downloading...", true, true,
 				new DialogInterface.OnCancelListener() {
 					
-					@Override
 					public void onCancel(DialogInterface dialog) {
 						System.out.println("Asynctask stopped");
 						RefreshTask.this.cancel(true);
@@ -62,10 +61,10 @@ public class RefreshTask extends AsyncTask<String, Void, String> {
 	@Override
 	public void onPostExecute(String possible_error) {
 		if (this.failed) {
-			Toast.makeText(this.context, possible_error, 1).show();
+			Toast.makeText(this.context, possible_error, Toast.LENGTH_SHORT).show();
 			return;
 		} else {
-			Toast.makeText(this.context, "Success!", 1).show();
+			Toast.makeText(this.context, "Success!", Toast.LENGTH_SHORT).show();
 			this.dialog.dismiss();
 			SchedView x = (SchedView)this.context;
 			x.setSchedule(this.schedule);
