@@ -1,4 +1,22 @@
-package org.ramaz.app;
+/*
+	Ramaz Schedule App for Android
+    Copyright (C) 2013  Michael Rosenberg
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package org.ramaz.scheduler;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -6,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import org.ramaz.scheduler.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -27,7 +47,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
-import android.widget.TableLayout.LayoutParams;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +59,6 @@ public class SchedView extends Activity {
 	public ArrayList<ArrayList<ClassRoom>> schedule = null;
 	private RefreshTask refreshTask;
 	public int lastWeekDay = 0, lastDayType = 0;
-	private int screenHeight;
 	
 	public void setSchedule(ArrayList<ArrayList<ClassRoom>> x) {
 		this.schedule = x;
@@ -77,15 +95,15 @@ public class SchedView extends Activity {
 		/*System.out.println("Username is: " + username);
 		System.out.println("Password is: " + password);*/
 		this.refreshTask.execute(username, password);
-		/*} else {
-			int b = 0;
-			for (ArrayList<ClassRoom> i: this.schedule) {
-				for (ClassRoom j: i) {
-					b++;
-				}
+		/*
+		int b = 0;
+		for (ArrayList<ClassRoom> i: this.schedule) {
+			for (ClassRoom j: i) {
+				b++;
 			}
-			System.out.println("There are " + b + " classes");
-		}*/
+		}
+		System.out.println("There are " + b + " classes");
+		*/
 	}
 
 	private void loadSchedule() throws Exception {
@@ -125,11 +143,12 @@ public class SchedView extends Activity {
 				return;
 			}
 			this.lastWeekDay = dayChoice;
-			TextView titleTxt = (TextView)findViewById(R.id.chosenDayTxt);
+			//TextView titleText = (TextView)findViewById(R.id.titleText);
 			String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
 			title += " - ";
 			title += getResources().getStringArray(R.array.day_types)[this.lastDayType];
-			titleTxt.setText(title);
+			//titleText.setText(title);
+			setTitle(title);
 			//System.out.println("Status bar height == " + getStatusBarHeight());
 			System.out.println("Schedule size: " + this.schedule.size());
 			for (int i = 0; i < this.schedule.size(); i++) {
@@ -151,11 +170,13 @@ public class SchedView extends Activity {
 
 	public void displayTimes(int timeChoice) {
 		this.lastDayType = timeChoice;
-		TextView titleTxt = (TextView)findViewById(R.id.chosenDayTxt);
+		//TextView titleText = (TextView)findViewById(R.id.titleText);
 		String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
 		title += " - ";
 		title += getResources().getStringArray(R.array.day_types)[this.lastDayType];
-		titleTxt.setText(title);
+		System.out.println("title == " + title);
+		//titleText.setText(title);
+		setTitle(title);
 		ArrayList<StartEnd> times;
 		switch (timeChoice) {
 		case 0:
@@ -189,7 +210,7 @@ public class SchedView extends Activity {
 		int i = 0;
 		while (it.hasNext()) {
 			StartEnd se = it.next();
-			TableRow row = (TableRow) findViewById(i);
+			LinearLayout row = (LinearLayout) findViewById(i);
 			TextView timeTxt = (TextView) row.findViewById(R.id.timeText);
 			TextView classTxt = (TextView) row.findViewById(R.id.classText);
 			TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
@@ -197,14 +218,6 @@ public class SchedView extends Activity {
 				timeTxt.setText(se.start + "\n" + se.end);
 				classTxt.setTextColor(this.textColor);
 				roomTxt.setTextColor(this.textColor);
-				/*if (i % 2 == 0) {
-					classTxt.setTextColor(this.lightRowBg); // Dark background
-															// on even rows
-					roomTxt.setTextColor(this.lightRowBg);
-				} else {
-					classTxt.setTextColor(this.darkRowBg); // Light on odd
-					roomTxt.setTextColor(this.darkRowBg);
-				}*/
 			} else {
 				timeTxt.setText("");
 				if (i % 2 == 0) {
@@ -282,70 +295,36 @@ public class SchedView extends Activity {
 		super.onCreate(savedInstanceState);
 		this.refreshTask = null;
 		this.schedule = null;
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
-		/*DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		System.out.println("Vertical dpi is: " + dm.ydpi);*/
-		
-		//LinearLayout calibrator = new LinearLayout(this);
-		
-		
-		int statusBarHeight = 0;
-		this.screenHeight = getWindowManager().getDefaultDisplay().getHeight();
-		System.out.println("Height " + this.screenHeight);
-		switch (this.screenHeight) {
-		case 320:
-		case 400:
-		case 432:
-			statusBarHeight = 20;
-			break;
-		case 480:
-		case 854:
-			statusBarHeight = 25;
-			break;
-		case 800:
-		case 1184:
-			statusBarHeight = 38;
-			break;
-		}
-
-		int titleRowHeight = 0;
-		if (this.screenHeight == 1184)
-			titleRowHeight = 40;
-		else
-			titleRowHeight = 30;
-		this.screenHeight -= statusBarHeight;
-		this.screenHeight -= titleRowHeight;
-		int amount = 10; // Number of classes in a day
+				int classNum = 10; // Number of classes in a day
 		LinearLayout root = new LinearLayout(this);
-		root.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		root.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		root.setOrientation(LinearLayout.VERTICAL);
 		
-		TableRow titleRow = (TableRow) getLayoutInflater().inflate(R.layout.title_row, null);
-		LinearLayout titleRowHDet = (LinearLayout) titleRow.findViewById(R.id.titleRowHDet); // Get layout that determines the titleRow's height in px
-		titleRowHDet.setLayoutParams(new TableRow.LayoutParams(LayoutParams.FILL_PARENT, titleRowHeight));
-		root.addView(titleRow);
+		//TextView titleTxt = (TextView) getLayoutInflater().inflate(R.layout.title_text, null);
+		TableLayout table = new TableLayout(this);
+		table.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT));
 		
-		//root.addView(getLayoutInflater().inflate(R.layout.title_row, null));
+		/*if (requestWindowFeature(Window.FEATURE_CUSTOM_TITLE)) {
+			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_text);
+		}
+		else {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			titleTxt = (TextView) getLayoutInflater().inflate(R.layout.title_text, null);
+			root.addView(titleTxt);
+		}*/
 		
-		TableLayout table = (TableLayout) getLayoutInflater().inflate(R.layout.table, null);
-		//TableRow titleRow = (TableRow)getLayoutInflater().inflate(R.layout.title_row, null);
-		//table.addView(titleRow);
-		for (int i = 0; i < amount; i++) {
-			TableRow row = (TableRow) getLayoutInflater().inflate(R.layout.table_row, null);
+		for (int i = 0; i < classNum; i++) {
+			
+			TableRow row = (TableRow) getLayoutInflater().inflate(R.layout.sched_row, null);
+			row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT, 1f));
 			TextView orderTxt = (TextView) row.findViewById(R.id.orderText);
 			TextView timeTxt = (TextView) row.findViewById(R.id.timeText);
 			TextView classTxt = (TextView) row.findViewById(R.id.classText);
 			TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
 
 			orderTxt.setText(Integer.toString(i + 2) + ".");
-
-			TableRow.LayoutParams timeLayoutParams = new TableRow.LayoutParams(
-					LayoutParams.FILL_PARENT, this.screenHeight / amount);
-			timeLayoutParams.setMargins(0, 0, 1, 0);
-			timeTxt.setLayoutParams(timeLayoutParams);
 
 			//registerForContextMenu(row); Future feature
 			row.setId(i);
@@ -363,12 +342,11 @@ public class SchedView extends Activity {
 				roomTxt.setBackgroundColor(this.lightRowBg);
 			}
 
-			// NEW CODE
 			orderTxt.setTextColor(this.textColor);
 			timeTxt.setTextColor(this.textColor);
 			classTxt.setTextColor(this.textColor);
 			roomTxt.setTextColor(this.textColor);
-			
+		
 			table.addView(row);
 		}
 		root.addView(table);

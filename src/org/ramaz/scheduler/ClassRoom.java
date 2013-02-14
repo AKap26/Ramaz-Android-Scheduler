@@ -1,4 +1,9 @@
-package org.ramaz.app;
+/*
+    Copyright (C) 2013  Michael Rosenberg
+    See SchedView.java for full notice
+*/
+
+package org.ramaz.scheduler;
 
 public class ClassRoom {
 	public String subject;

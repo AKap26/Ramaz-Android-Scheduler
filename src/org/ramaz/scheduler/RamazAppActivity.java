@@ -1,4 +1,6 @@
-package org.ramaz.app;
+package org.ramaz.scheduler;
+
+import org.ramaz.scheduler.R;
 
 import android.app.Activity;
 import android.content.Intent;

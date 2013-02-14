@@ -1,4 +1,11 @@
-package org.ramaz.app;
+/*
+    Copyright (C) 2013  Michael Rosenberg
+    See SchedView.java for full notice
+*/
+
+package org.ramaz.scheduler;
+
+import org.ramaz.scheduler.R;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
