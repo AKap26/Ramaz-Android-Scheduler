@@ -36,14 +36,19 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -238,9 +243,26 @@ public class SchedView extends Activity {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.setHeaderTitle("Context Menu");
-		menu.add(Menu.NONE, v.getId(), 0, "Action 1");
-		menu.add(Menu.NONE, v.getId(), 0, "Action 2");
+		((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(40);
+		Intent classViewIntent = new Intent(this, ClassView.class);
+		classViewIntent.putExtra("subject", ((TextView) v.findViewById(R.id.classText)).getText().toString());
+		classViewIntent.putExtra("room", ((TextView) v.findViewById(R.id.roomText)).getText().toString());
+		String period = ((TextView) v.findViewById(R.id.orderText)).getText().toString();
+		period = period.substring(0, period.length() - 1);
+		startActivityForResult(classViewIntent, Integer.parseInt(period) - 2);
+	}
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		if(resultCode == RESULT_OK){
+			String subject = data.getStringExtra("subject");
+			String room = data.getStringExtra("room");
+			ClassRoom newClass = this.schedule.get(requestCode).get(this.lastWeekDay);
+			newClass.subject = subject;
+			newClass.room = room;
+			this.displayClasses(this.lastWeekDay);
+			this.writeSchedule();
+		}
 	}
 
 	@Override
@@ -326,21 +348,19 @@ public class SchedView extends Activity {
 
 			orderTxt.setText(Integer.toString(i + 2) + ".");
 
-			//registerForContextMenu(row); Future feature
+			registerForContextMenu(row);
 			row.setId(i);
-			
 
-			if (i % 2 == 0) { // Alternate colors to boost contrast
-				orderTxt.setBackgroundColor(this.darkRowBg);
-				timeTxt.setBackgroundColor(this.darkRowBg);
-				classTxt.setBackgroundColor(this.darkRowBg);
-				roomTxt.setBackgroundColor(this.darkRowBg);
-			} else {
-				orderTxt.setBackgroundColor(this.lightRowBg);
-				timeTxt.setBackgroundColor(this.lightRowBg);
-				classTxt.setBackgroundColor(this.lightRowBg);
-				roomTxt.setBackgroundColor(this.lightRowBg);
-			}
+			int color;
+			if (i%2 == 1)
+				color = this.darkRowBg;
+			else
+				color = this.lightRowBg;
+			
+			orderTxt.setBackgroundColor(color);
+			timeTxt.setBackgroundColor(color);
+			classTxt.setBackgroundColor(color);
+			roomTxt.setBackgroundColor(color);
 
 			orderTxt.setTextColor(this.textColor);
 			timeTxt.setTextColor(this.textColor);

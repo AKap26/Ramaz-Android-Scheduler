@@ -4,9 +4,7 @@
     <string name="hello">Hello World, RamazAppActivity!</string>
     <string name="app_name">Ramaz</string>
     <string name="prompt">HI THERE!</string>
-    <string name="about">
-    Created by Michael Rosenberg, class of 2015\nMade predominantly while I should have been studying for a Rabbi Stochel exam\nRegretful? Most certainly.
-    </string>
+    <string name="about">    Created by Michael Rosenberg, class of 2015\nMade predominantly while I should have been studying for a Rabbi Stochel exam\nRegretful? Most certainly.</string>
 
     <string-array name="day_types">
         <item>Monday-Thursday</item>
@@ -26,5 +24,9 @@
         <item>C</item>
         <item>D</item>
     </string-array>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_class_view">ClassView</string>
 
 </resources>
