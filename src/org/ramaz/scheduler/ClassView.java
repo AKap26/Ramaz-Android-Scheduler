@@ -1,3 +1,8 @@
+/*
+    Copyright (C) 2013  Michael Rosenberg
+    See SchedView.java for full notice
+*/
+
 package org.ramaz.scheduler;
 
 import android.os.Bundle;
