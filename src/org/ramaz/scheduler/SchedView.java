@@ -19,11 +19,16 @@
 package org.ramaz.scheduler;
 
 import java.io.BufferedReader;
+import java.text.SimpleDateFormat;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.ramaz.scheduler.R;
 
@@ -36,7 +41,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -61,10 +65,16 @@ public class SchedView extends Activity {
 	private int lightRowBg = 0xFFEBEBEB; //0xffaaaaaa;
 	private int darkRowBg = 0xFFB0B0B0; //Color.DKGRAY;
 	private int textColor = 0xFF000000;
+	private int lightHighlightColor = 0xFF99B0F0;
+	private int darkHighlightColor = darkRowBg + (lightHighlightColor - lightRowBg);//0xFF5E75B5;
+	private int fingerPressColor = 0xFFFFD738;
+	private int classNum = 10; // Number of classes in a day
+	private int currentPeriodCheckInterval = 5000; // 5 seconds
 	public ArrayList<ArrayList<ClassRoom>> schedule = null;
+	ArrayList<StartEnd> times = null;
 	private RefreshTask refreshTask;
+	private Timer timer;
 	public int lastWeekDay = 0, lastDayType = 0;
-	
 	public void setSchedule(ArrayList<ArrayList<ClassRoom>> x) {
 		this.schedule = x;
 	}
@@ -78,7 +88,8 @@ public class SchedView extends Activity {
 		for (ArrayList<ClassRoom> i: this.schedule) {
 			for (ClassRoom j: i) {
 				try {
-					fos.write((j.subject + ";" + j.room + "\n").getBytes());
+					fos.write((j.subject.replaceAll(";", "%semi%") + ";" +
+							   j.room.replaceAll(";", "%semi%") + "\n").getBytes());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -110,6 +121,77 @@ public class SchedView extends Activity {
 		System.out.println("There are " + b + " classes");
 		*/
 	}
+	
+	private void setRowColor(int row_index, int color) {
+		TableRow row = (TableRow) findViewById(row_index);
+		if (row_index >= classNum || row_index < 0)
+			return;
+		row.findViewById(R.id.orderText).setBackgroundColor(color);
+		row.findViewById(R.id.timeText).setBackgroundColor(color);
+		row.findViewById(R.id.classText).setBackgroundColor(color);
+		row.findViewById(R.id.roomText).setBackgroundColor(color);
+	}
+	
+	private void setRowColor(TableRow row, int color) {
+		row.findViewById(R.id.orderText).setBackgroundColor(color);
+		row.findViewById(R.id.timeText).setBackgroundColor(color);
+		row.findViewById(R.id.classText).setBackgroundColor(color);
+		row.findViewById(R.id.roomText).setBackgroundColor(color);
+	}
+	
+	private void resetRowColors() {
+		for (int i = 0; i < classNum; i++) {
+			TableRow row = (TableRow) findViewById(i);
+			TextView timeTxt = (TextView) row.findViewById(R.id.timeText);
+			TextView classTxt = (TextView) row.findViewById(R.id.classText);
+			TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
+			TextView orderTxt = (TextView) row.findViewById(R.id.orderText);
+			int color;
+			if (i%2 == 1)
+				color = this.darkRowBg;
+			else
+				color = this.lightRowBg;
+			
+			orderTxt.setBackgroundColor(color);
+			timeTxt.setBackgroundColor(color);
+			classTxt.setBackgroundColor(color);
+			roomTxt.setBackgroundColor(color);
+		}
+	}
+	
+	private int timeStrToInt(String t) {
+		int r;
+		String[] s = t.split(":");
+		r = Integer.parseInt(s[0]) * 100;
+		r += Integer.parseInt(s[1]);
+		return r;
+	}
+	
+	private void highlightCurrentClass() {
+		System.out.println("Checking for current class...");
+		resetRowColors();
+		int now = timeStrToInt(new SimpleDateFormat("H:mm").format(Calendar.getInstance().getTime()));
+		if (now < 845 || now >= 1645)
+			return;
+		if (times == null)
+			return;
+		int i = -1;
+		for (StartEnd se : times) {
+			//System.out.println("now == " + now + ", se.start == " + se.start + ", se.end == " + se.end);
+			i++;
+			if (se.skip)
+				continue;
+			int start = timeStrToInt(se.start);
+			int end = timeStrToInt(se.end);
+			if (now < start || now < end) {
+				if (i % 2 == 0)
+					setRowColor(i, lightHighlightColor);
+				else
+					setRowColor(i, darkHighlightColor);
+				return;
+			}
+		}
+	}
 
 	private void loadSchedule() throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput("schedule.txt"))); // Should throw FileNotFoundException if it fails
@@ -122,6 +204,13 @@ public class SchedView extends Activity {
 				line = br.readLine();
 				System.out.println("Line is " + line + " on line " + ((i*6) + j+1));
 				String[] cr = line.split(";");
+				if (cr.length < 2) {
+					String tmp = cr[0];
+					cr = new String[2];
+					cr[0] = tmp; cr[1] = "";
+				}
+				cr[0] = cr[0].replaceAll("%semi%", ";");
+				cr[1] = cr[1].replaceAll("%semi%", ";");
 				System.out.println("Loaded " + cr[0] + ", " + cr[1]);
 				x++;
 				row.add(new ClassRoom(cr[0], cr[1]));
@@ -142,38 +231,41 @@ public class SchedView extends Activity {
 
 	public void displayClasses(int dayChoice) {
 		System.out.println("In displayClasses");
-		if (this.schedule != null) {
-			if (this.schedule.size() != 10) {
-				Toast.makeText(this, "Something went wrong, please refresh", Toast.LENGTH_SHORT).show();
-				return;
-			}
-			this.lastWeekDay = dayChoice;
-			//TextView titleText = (TextView)findViewById(R.id.titleText);
-			String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
-			title += " - ";
-			title += getResources().getStringArray(R.array.day_types)[this.lastDayType];
-			//titleText.setText(title);
-			setTitle(title);
-			//System.out.println("Status bar height == " + getStatusBarHeight());
-			System.out.println("Schedule size: " + this.schedule.size());
-			for (int i = 0; i < this.schedule.size(); i++) {
-				TableRow row = (TableRow) findViewById(i);
-				TextView classTxt = (TextView) row.findViewById(R.id.classText);
-				TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
+		if (schedule == null)
+			return;
+		if (this.schedule.size() != 10) {
+			Toast.makeText(this, "Something went wrong, please refresh", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		this.lastWeekDay = dayChoice;
+		//TextView titleText = (TextView)findViewById(R.id.titleText);
+		String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
+		title += " - ";
+		title += getResources().getStringArray(R.array.day_types)[this.lastDayType];
+		//titleText.setText(title);
+		setTitle(title);
+		//System.out.println("Status bar height == " + getStatusBarHeight());
+		System.out.println("Schedule size: " + this.schedule.size());
+		for (int i = 0; i < this.schedule.size(); i++) {
+			/*if (i == 2)
+				setRowColor(i, lightHighlightColor);
+			if (i == 5)
+				setRowColor(i, darkHighlightColor);*/
+			TableRow row = (TableRow) findViewById(i);
+			TextView classTxt = (TextView) row.findViewById(R.id.classText);
+			TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
 
-				ClassRoom curr = this.schedule.get(i).get(dayChoice);
-				classTxt.setText(curr.subject);
-				System.out.println("Class is \""+curr.subject+"\"");
-				if (curr.subject.equals("Lunch") || curr.subject.equals("Free"))
-					roomTxt.setText("");
-				else
-					roomTxt.setText(curr.room);
+			ClassRoom curr = this.schedule.get(i).get(dayChoice);
+			classTxt.setText(curr.subject);
+			System.out.println("Class is \""+curr.subject+"\"");
+			roomTxt.setText(curr.room);
 
-			}
 		}
 	}
 
 	public void displayTimes(int timeChoice) {
+		if (this.schedule == null)
+			return;
 		this.lastDayType = timeChoice;
 		//TextView titleText = (TextView)findViewById(R.id.titleText);
 		String title = getResources().getStringArray(R.array.week_days)[this.lastWeekDay];
@@ -182,7 +274,6 @@ public class SchedView extends Activity {
 		System.out.println("title == " + title);
 		//titleText.setText(title);
 		setTitle(title);
-		ArrayList<StartEnd> times;
 		switch (timeChoice) {
 		case 0:
 			times = DayTimes.Mon2Thurs;
@@ -215,19 +306,28 @@ public class SchedView extends Activity {
 		int i = 0;
 		while (it.hasNext()) {
 			StartEnd se = it.next();
+			SimpleDateFormat twelveHour = new SimpleDateFormat("h:mm");
+			Date d1 = new Date();
+			Date d2 = new Date();
+			try {
+				d1 = twelveHour.parse(se.start);
+				d2 = twelveHour.parse(se.end);
+			} catch(Exception e){}
+			String start = twelveHour.format(d1);
+			String end = twelveHour.format(d2);
 			LinearLayout row = (LinearLayout) findViewById(i);
 			TextView timeTxt = (TextView) row.findViewById(R.id.timeText);
 			TextView classTxt = (TextView) row.findViewById(R.id.classText);
 			TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
 			if (!se.skip) {
-				timeTxt.setText(se.start + "\n" + se.end);
+				timeTxt.setText(start + "\n" + end);
 				classTxt.setTextColor(this.textColor);
 				roomTxt.setTextColor(this.textColor);
 			} else {
 				timeTxt.setText("");
 				if (i % 2 == 0) {
 					classTxt.setTextColor(this.darkRowBg); // Dark background on
-															// even rows
+														   // even rows
 					roomTxt.setTextColor(this.darkRowBg);
 				} else {
 					classTxt.setTextColor(this.lightRowBg); // Light on odd
@@ -237,6 +337,7 @@ public class SchedView extends Activity {
 			//System.out.println(se.start + " " + se.end);
 			i++;
 		}
+		highlightCurrentClass();
 	}
 
 	@Override
@@ -319,7 +420,6 @@ public class SchedView extends Activity {
 		this.schedule = null;
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
-				int classNum = 10; // Number of classes in a day
 		LinearLayout root = new LinearLayout(this);
 		root.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		root.setOrientation(LinearLayout.VERTICAL);
@@ -345,27 +445,39 @@ public class SchedView extends Activity {
 			TextView timeTxt = (TextView) row.findViewById(R.id.timeText);
 			TextView classTxt = (TextView) row.findViewById(R.id.classText);
 			TextView roomTxt = (TextView) row.findViewById(R.id.roomText);
+			
+			orderTxt.setTextColor(this.textColor);
+			timeTxt.setTextColor(this.textColor);
+			classTxt.setTextColor(this.textColor);
+			roomTxt.setTextColor(this.textColor);
 
 			orderTxt.setText(Integer.toString(i + 2) + ".");
 
 			registerForContextMenu(row);
 			row.setId(i);
-
-			int color;
-			if (i%2 == 1)
-				color = this.darkRowBg;
-			else
-				color = this.lightRowBg;
-			
-			orderTxt.setBackgroundColor(color);
-			timeTxt.setBackgroundColor(color);
-			classTxt.setBackgroundColor(color);
-			roomTxt.setBackgroundColor(color);
-
-			orderTxt.setTextColor(this.textColor);
-			timeTxt.setTextColor(this.textColor);
-			classTxt.setTextColor(this.textColor);
-			roomTxt.setTextColor(this.textColor);
+			row.setOnTouchListener(new OnTouchListener() {
+				public boolean onTouch(final View v, MotionEvent event) {
+					if (event.getAction() == MotionEvent.ACTION_DOWN) {
+						runOnUiThread(new Runnable() {
+							public void run() {
+								setRowColor((TableRow) v, fingerPressColor);
+							}
+						});
+					}
+					else if (event.getAction() == MotionEvent.ACTION_UP) {
+						runOnUiThread(new Runnable() {
+							public void run() {
+								if (v.getId() % 2 == 0)
+									setRowColor((TableRow) v, lightRowBg);
+								else
+									setRowColor((TableRow) v, darkRowBg);
+								highlightCurrentClass(); // Immediately reset the highlighting in case it was changed
+							}
+						});
+					}
+					return false;
+				}
+			});
 		
 			table.addView(row);
 		}
@@ -381,13 +493,26 @@ public class SchedView extends Activity {
 		}
 		
 		loadState();
+		resetRowColors();
 		this.displayClasses(this.lastWeekDay);
 		this.displayTimes(this.lastDayType);
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						highlightCurrentClass();
+					}
+				});
+			}
+		}, 0, currentPeriodCheckInterval);
 	}
 	
 	@Override
 	public void onStop() {
 		super.onStop();
+		System.out.println("Dying...");
 		FileOutputStream fos = null;
 		try {
 			fos = openFileOutput("state.txt", Context.MODE_PRIVATE);

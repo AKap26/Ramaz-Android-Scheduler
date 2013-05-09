@@ -114,14 +114,19 @@ public class RamazConn {
 					try {
 						Integer.parseInt(fields[0]); // If it just gives a period # as opposed to period #-class-id, it's a free
 						myClass = "Free";
-						myRoom = "place"; // Need placeholder text even if room is not shown, otherwise throws indexoutofbounds
+						myRoom = ""; // Need placeholder text even if room is not shown, otherwise throws indexoutofbounds
 					} catch (Exception e) {
 						break; // This means that it's either Mincha or Homeroom
 					}
 				} else {
 					myClass = fields[1].replaceAll("\\s$", "");
 					myClass = myClass.replaceAll("&amp;", "");
-					myRoom = fields[2].substring(1, 4);
+					if (myClass.equals("Lunch"))
+						myRoom = "";
+					else
+						myRoom = fields[2].substring(1, 4);
+					myClass = myClass.replaceAll("%semi%", ";");
+					myRoom = myRoom.replaceAll("%semi%", ";");
 				}
 				rowData.add(new ClassRoom(myClass, myRoom));
 				/*System.out.println("Class:"); System.out.println(myClass);
