@@ -36,7 +36,7 @@ public class RamazConn {
 	void downloadData(String username, String password) throws Exception {
 
 		// Login and get valid cookies
-		HttpPost httpost = new HttpPost("http://www.ramaz.org/login/login.cfm");
+		HttpPost httpost = new HttpPost("http://web.ramaz.org/login/login.cfm");
 
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 		nvps.add(new BasicNameValuePair("username", username));
@@ -60,7 +60,7 @@ public class RamazConn {
 			}
 		}
 
-		HttpGet get = new HttpGet("http://www.ramaz.org/appHelper/classSched.cfm");
+		HttpGet get = new HttpGet("http://web.ramaz.org/appHelper/classSched.cfm");
 		response = this.httpclient.execute(get);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
 				.getEntity().getContent()));
@@ -81,10 +81,10 @@ public class RamazConn {
 		HttpGet get;
 		if (this.isStudent) {
 			get = new HttpGet(
-					"http://www.ramaz.org/course/view_class_schedule.cfm?semester=" + this.semester + "&id_student=" + this.id);
+					"http://web.ramaz.org/course/view_class_schedule.cfm?semester=" + this.semester + "&id_student=" + this.id);
 		} else {
 			get = new HttpGet(
-					"http://www.ramaz.org/course/view_faculty_class_schedule.cfm?semester=" + this.semester + "&id_faculty=" + this.id);
+					"http://web.ramaz.org/course/view_faculty_class_schedule.cfm?semester=" + this.semester + "&id_faculty=" + this.id);
 		}
 		HttpResponse response = this.httpclient.execute(get);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
