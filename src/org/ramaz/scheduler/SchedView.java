@@ -108,10 +108,8 @@ public class SchedView extends Activity {
 				.getDefaultSharedPreferences(this);
 		String username = preferences.getString("username", "");
 		String password = preferences.getString("password", "");
-		/*System.out.println("Username is: " + username);
-		System.out.println("Password is: " + password);*/
 		this.refreshTask.execute(username, password);
-		/*
+		
 		int b = 0;
 		for (ArrayList<ClassRoom> i: this.schedule) {
 			for (ClassRoom j: i) {
@@ -119,7 +117,7 @@ public class SchedView extends Activity {
 			}
 		}
 		System.out.println("There are " + b + " classes");
-		*/
+		
 	}
 	
 	private void setRowColor(int row_index, int color) {
@@ -179,7 +177,7 @@ public class SchedView extends Activity {
 		for (StartEnd se : times) {
 			//System.out.println("now == " + now + ", se.start == " + se.start + ", se.end == " + se.end);
 			i++;
-			if (se.skip)
+			if (se.skip) // Is this class skipped today?
 				continue;
 			int start = timeStrToInt(se.start);
 			int end = timeStrToInt(se.end);

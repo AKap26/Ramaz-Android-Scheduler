@@ -30,11 +30,6 @@ public class RefreshTask extends AsyncTask<String, Void, String> {
 		if (this.conn == null) {
 			this.conn = new RamazConn();
 		}
-		/*
-		this.dialog = new ProgressDialog(context);
-		this.dialog.setMessage("Downloading...");
-		this.dialog.show();
-		this.dialog.setCancelable(true);*/
 		this.dialog = ProgressDialog.show(this.context, "", "Downloading...", true, true,
 				new DialogInterface.OnCancelListener() {
 					
@@ -71,16 +66,16 @@ public class RefreshTask extends AsyncTask<String, Void, String> {
 		} else {
 			Toast.makeText(this.context, "Success!", Toast.LENGTH_SHORT).show();
 			this.dialog.dismiss();
-			SchedView x = (SchedView)this.context;
-			x.setSchedule(this.schedule);
-			for (ArrayList<ClassRoom> i: x.schedule) {
+			SchedView mainView = (SchedView)this.context;
+			mainView.setSchedule(this.schedule);
+			for (ArrayList<ClassRoom> i: mainView.schedule) {
 				for (ClassRoom j: i) {
 					System.out.println(j.subject + " " + j.room);
 				}
 			}
-			x.writeSchedule();
-			x.displayTimes(x.lastDayType);
-			x.displayClasses(x.lastWeekDay);
+			mainView.writeSchedule();
+			mainView.displayTimes(mainView.lastDayType);
+			mainView.displayClasses(mainView.lastWeekDay);
 		}
 	}
 }

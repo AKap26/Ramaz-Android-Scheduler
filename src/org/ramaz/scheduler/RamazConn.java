@@ -36,19 +36,17 @@ public class RamazConn {
 	void downloadData(String username, String password) throws Exception {
 
 		// Login and get valid cookies
-		HttpPost httpost = new HttpPost("http://web.ramaz.org/login/login.cfm");
+		HttpPost post = new HttpPost("https://web.ramaz.org/login/login.cfm");
 
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 		nvps.add(new BasicNameValuePair("username", username));
 		nvps.add(new BasicNameValuePair("password", password));
 
-		httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+		post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
-		HttpResponse response = this.httpclient.execute(httpost);
-		// HttpEntity entity = response.getEntity();
+		HttpResponse response = this.httpclient.execute(post);
 
 		System.out.println("Login form get: " + response.getStatusLine());
-		// EntityUtils.consume(entity);
 
 		System.out.println("Post logon cookies:");
 		List<Cookie> cookies = this.httpclient.getCookieStore().getCookies();
@@ -60,7 +58,7 @@ public class RamazConn {
 			}
 		}
 
-		HttpGet get = new HttpGet("http://web.ramaz.org/appHelper/classSched.cfm");
+		HttpGet get = new HttpGet("https://web.ramaz.org/appHelper/classSched.cfm");
 		response = this.httpclient.execute(get);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
 				.getEntity().getContent()));
@@ -81,10 +79,10 @@ public class RamazConn {
 		HttpGet get;
 		if (this.isStudent) {
 			get = new HttpGet(
-					"http://web.ramaz.org/course/view_class_schedule.cfm?semester=" + this.semester + "&id_student=" + this.id);
+					"https://web.ramaz.org/course/view_class_schedule.cfm?semester=" + this.semester + "&id_student=" + this.id);
 		} else {
 			get = new HttpGet(
-					"http://web.ramaz.org/course/view_faculty_class_schedule.cfm?semester=" + this.semester + "&id_faculty=" + this.id);
+					"https://web.ramaz.org/course/view_faculty_class_schedule.cfm?semester=" + this.semester + "&id_faculty=" + this.id);
 		}
 		HttpResponse response = this.httpclient.execute(get);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
@@ -119,14 +117,16 @@ public class RamazConn {
 						break; // This means that it's either Mincha or Homeroom
 					}
 				} else {
-					myClass = fields[1].replaceAll("\\s$", "");
-					myClass = myClass.replaceAll("&amp;", "");
+					myClass = fields[1].replaceAll("\\s$", ""); // Delete trailing whitespace
+					myClass = myClass.replaceAll("^\\s+", "");  // Delete leading whitespace
+					myClass = myClass.replaceAll("&amp;", "");  // Weird trailing ampersands show up sometimes :-\  Delete them
 					if (myClass.equals("Lunch"))
 						myRoom = "";
 					else
 						myRoom = fields[2].substring(1, 4);
-					myClass = myClass.replaceAll("%semi%", ";");
-					myRoom = myRoom.replaceAll("%semi%", ";");
+					// Why did I include this? Comment out until something breaks
+				/*	myClass = myClass.replaceAll("%semi%", ";");
+					myRoom = myRoom.replaceAll("%semi%", ";");*/
 				}
 				rowData.add(new ClassRoom(myClass, myRoom));
 				/*System.out.println("Class:"); System.out.println(myClass);
