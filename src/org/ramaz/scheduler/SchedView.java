@@ -66,7 +66,7 @@ public class SchedView extends Activity {
 	private int darkRowBg = 0xFFB0B0B0; //Color.DKGRAY;
 	private int textColor = 0xFF000000;
 	private int lightHighlightColor = 0xFF99B0F0;
-	private int darkHighlightColor = darkRowBg + (lightHighlightColor - lightRowBg);//0xFF5E75B5;
+	private int darkHighlightColor = darkRowBg + (lightHighlightColor - lightRowBg); //0xFF5E75B5;
 	private int fingerPressColor = 0xFFFFD738;
 	private int classNum = 10; // Number of classes in a day
 	private int currentPeriodCheckInterval = 5000; // 5 seconds
@@ -75,8 +75,8 @@ public class SchedView extends Activity {
 	private RefreshTask refreshTask;
 	private Timer timer;
 	public int lastWeekDay = 0, lastDayType = 0;
-	public void setSchedule(ArrayList<ArrayList<ClassRoom>> x) {
-		this.schedule = x;
+	public void setSchedule(ArrayList<ArrayList<ClassRoom>> sched) {
+		this.schedule = sched;
 	}
 	
 	public void writeSchedule() {
@@ -173,10 +173,9 @@ public class SchedView extends Activity {
 			return;
 		if (times == null)
 			return;
-		int i = -1;
+		int i = 0;
 		for (StartEnd se : times) {
 			//System.out.println("now == " + now + ", se.start == " + se.start + ", se.end == " + se.end);
-			i++;
 			if (se.skip) // Is this class skipped today?
 				continue;
 			int start = timeStrToInt(se.start);
@@ -188,6 +187,7 @@ public class SchedView extends Activity {
 					setRowColor(i, darkHighlightColor);
 				return;
 			}
+			i++;
 		}
 	}
 
@@ -195,7 +195,7 @@ public class SchedView extends Activity {
 		BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput("schedule.txt"))); // Should throw FileNotFoundException if it fails
 		this.schedule = new ArrayList<ArrayList<ClassRoom>>();
 		String line = null;
-		int x = 0;
+		int count = 0;
 		for (int i = 0; i < 10; i++) {
 			ArrayList<ClassRoom> row = new ArrayList<ClassRoom>();
 			for (int j = 0; j < 6; j++) {
@@ -210,12 +210,12 @@ public class SchedView extends Activity {
 				cr[0] = cr[0].replaceAll("%semi%", ";");
 				cr[1] = cr[1].replaceAll("%semi%", ";");
 				System.out.println("Loaded " + cr[0] + ", " + cr[1]);
-				x++;
+				count++;
 				row.add(new ClassRoom(cr[0], cr[1]));
 			}
 			this.schedule.add(row);
 		}
-		System.out.println("Loaded " + x);
+		System.out.println("Loaded " + count);
 	}
 	
 	private void loadState() {
@@ -420,9 +420,8 @@ public class SchedView extends Activity {
 		
 		LinearLayout root = new LinearLayout(this);
 		root.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-		root.setOrientation(LinearLayout.VERTICAL);
+		root.setOrientation(LinearLayout.VERTICAL); // Stay in portrait mode
 		
-		//TextView titleTxt = (TextView) getLayoutInflater().inflate(R.layout.title_text, null);
 		TableLayout table = new TableLayout(this);
 		table.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT));
 		
@@ -481,17 +480,17 @@ public class SchedView extends Activity {
 		}
 		root.addView(table);
 		setContentView(root);
+		resetRowColors();
 		
 		try {
 			this.loadSchedule();
 		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(this, "Go to preferences and enter your login info, then click menu->refresh.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Go to preferences and enter your login info, then click menu↳refresh.", Toast.LENGTH_LONG).show();
 			return;
 		}
 		
 		loadState();
-		resetRowColors();
 		this.displayClasses(this.lastWeekDay);
 		this.displayTimes(this.lastDayType);
 		timer = new Timer();

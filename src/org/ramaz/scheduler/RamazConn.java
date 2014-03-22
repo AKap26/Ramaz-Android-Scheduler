@@ -124,9 +124,6 @@ public class RamazConn {
 						myRoom = "";
 					else
 						myRoom = fields[2].substring(1, 4);
-					// Why did I include this? Comment out until something breaks
-				/*	myClass = myClass.replaceAll("%semi%", ";");
-					myRoom = myRoom.replaceAll("%semi%", ";");*/
 				}
 				rowData.add(new ClassRoom(myClass, myRoom));
 				/*System.out.println("Class:"); System.out.println(myClass);
