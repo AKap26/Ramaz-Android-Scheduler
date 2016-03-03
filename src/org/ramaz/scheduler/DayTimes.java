@@ -8,7 +8,8 @@ package org.ramaz.scheduler;
 import java.util.ArrayList;
 
 public class DayTimes {
-	public static ArrayList<StartEnd> Mon2Thurs;
+	public static ArrayList<StartEnd> M,R;
+	public static ArrayList<StartEnd> A,B,C;
 	public static ArrayList<StartEnd> RoshChodesh;
 	public static ArrayList<StartEnd> AMAssembly;
 	public static ArrayList<StartEnd> PMAssembly;
@@ -18,17 +19,29 @@ public class DayTimes {
 	public static ArrayList<StartEnd> Fri;
 	
 	static {
-		Mon2Thurs = new ArrayList<StartEnd>();
-		Mon2Thurs.add(new StartEnd("8:50","9:30"));
-		Mon2Thurs.add(new StartEnd("9:35","10:15"));
-		Mon2Thurs.add(new StartEnd("10:35","11:15"));
-		Mon2Thurs.add(new StartEnd("11:20","12:00"));
-		Mon2Thurs.add(new StartEnd("12:05","12:45"));
-		Mon2Thurs.add(new StartEnd("12:50","13:30"));
-		Mon2Thurs.add(new StartEnd("13:35","14:15"));
-		Mon2Thurs.add(new StartEnd("14:20","15:00"));
-		Mon2Thurs.add(new StartEnd("15:20","16:00"));
-		Mon2Thurs.add(new StartEnd("16:05","16:45"));
+		M,R = new ArrayList<StartEnd>();
+		M,R.add(new StartEnd("8:50","9:30"));
+		M,R.add(new StartEnd("9:35","10:15"));
+		M,R.add(new StartEnd("10:35","11:15"));
+		M,R.add(new StartEnd("11:20","12:00"));
+		M,R.add(new StartEnd("12:05","12:45"));
+		M,R.add(new StartEnd("12:50","13:30"));
+		M,R.add(new StartEnd("13:35","14:15"));
+		M,R.add(new StartEnd("14:20","15:00"));
+		M,R.add(new StartEnd("15:20","16:00"));
+		M,R.add(new StartEnd("16:05","16:45"));
+		
+		A,B,C = new ArrayList<StartEnd>();
+		A,B,C.add(new StartEnd("8:50","9:30"));
+		A,B,C.add(new StartEnd("9:35","10:15"));
+		A,B,C.add(new StartEnd("10:35","11:15"));
+		A,B,C.add(new StartEnd("11:20","12:00"));
+		A,B,C.add(new StartEnd("12:05","12:45"));
+		A,B,C.add(new StartEnd("12:50","13:30"));
+		A,B,C.add(new StartEnd("13:35","14:15"));
+		A,B,C.add(new StartEnd("14:20","15:00"));
+		A,B,C.add(new StartEnd("15:20","16:00"));
+		A,B,C.add(new StartEnd("16:05","16:45"));
 		
 		RoshChodesh = new ArrayList<StartEnd>();
 		RoshChodesh.add(new StartEnd("9:10", "9:49"));
